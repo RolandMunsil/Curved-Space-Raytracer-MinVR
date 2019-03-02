@@ -53,18 +53,7 @@ public:
     }
 
 
-    void onAnalogChange(const VRAnalogEvent &state) {
-        if (state.getName() == "FrameStart") {
-            float time = state.getValue();
-            // Calculate model matrix based on time
-            VRMatrix4 modelMatrix = VRMatrix4::rotationX(0.5f*time);
-            modelMatrix = modelMatrix * VRMatrix4::rotationY(0.5f*time);
-            for (int f = 0; f < 16; f++) {
-                model[f] = modelMatrix.getArray()[f];
-            }
-            return;
-        }
-    }
+    void onAnalogChange(const VRAnalogEvent &state) {}
     
     void onButtonDown(const VRButtonEvent &state) {
         if (state.getName() == "KbdEsc_Down") {
@@ -144,34 +133,8 @@ public:
 			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, cpuIndexByteSize, &cpuIndexArray[0]);
             
             // Create shader
-			std::ifstream inFile("../../bin/shader.vert", std::ios::in);
-			if (!inFile) {
-				throw std::runtime_error("could not load file");
-			}
-
-			// Get file contents
-			std::stringstream code;
-			code << inFile.rdbuf();
-			inFile.close();
-
-			std::string asString = code.str();
-
-			GLuint vshader = compileShader(asString, GL_VERTEX_SHADER);
-
-            
-			std::ifstream inFile2("../../bin/shader.frag", std::ios::in);
-			if (!inFile2) {
-				throw std::runtime_error("could not load file");
-			}
-
-			// Get file contents
-			std::stringstream code2;
-			code2 << inFile2.rdbuf();
-			inFile2.close();
-
-			std::string asString2 = code2.str();
-
-			GLuint fshader = compileShader(asString2, GL_FRAGMENT_SHADER);
+			GLuint vshader = loadAndCompileShader("../../bin/shader.vert", GL_VERTEX_SHADER);
+			GLuint fshader = loadAndCompileShader("../../bin/shader.frag", GL_FRAGMENT_SHADER);
             
             // Create shader program
 			_programHandle = glCreateProgram();
@@ -219,6 +182,21 @@ public:
     void onRenderHaptics(const VRHapticsState& state) {}
     
     
+	GLuint loadAndCompileShader(const std::string& pathToFile, GLuint shaderType) {
+		std::ifstream inFile(pathToFile, std::ios::in);
+		if (!inFile) {
+			throw std::runtime_error("could not load file");
+		}
+
+		// Get file contents
+		std::stringstream code;
+		code << inFile.rdbuf();
+		inFile.close();
+
+		std::string asString = code.str();
+		return compileShader(asString, shaderType);
+	}
+
 	/// Compiles shader
 	GLuint compileShader(const std::string& shaderText, GLuint shaderType) {
 		const char* source = shaderText.c_str();
@@ -260,7 +238,6 @@ private:
 	GLuint _indexVBO;
 	GLsizei _numIndices;
 	GLuint _programHandle;
-	float model[16];
 };
 
 
