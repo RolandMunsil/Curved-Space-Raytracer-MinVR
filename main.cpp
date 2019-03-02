@@ -87,10 +87,7 @@ public:
 			}
 #endif
 			// Init GL
-			glEnable(GL_DEPTH_TEST);
-			glClearDepth(1.0f);
-			glDepthFunc(GL_LEQUAL);
-			glClearColor(0, 0, 0, 1);
+			glClearColor(0, 0, 0, 0);
 
 			std::vector<vec3> cpuVertexArray;
 			std::vector<int> cpuIndexArray;
@@ -132,7 +129,7 @@ public:
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, cpuIndexByteSize, NULL, GL_STATIC_DRAW);
 			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, cpuIndexByteSize, &cpuIndexArray[0]);
             
-            // Create shader
+            // Create shaders
 			GLuint vshader = loadAndCompileShader("../../bin/shader.vert", GL_VERTEX_SHADER);
 			GLuint fshader = loadAndCompileShader("../../bin/shader.frag", GL_FRAGMENT_SHADER);
             
@@ -142,37 +139,31 @@ public:
             glAttachShader(_programHandle, fshader);
             linkShaderProgram(_programHandle);
 			glUseProgram(_programHandle);
+
+			iResolutionLocation = glGetUniformLocation(_programHandle, "iResolution");
+			iTimeLocation = glGetUniformLocation(_programHandle, "iTime");
+			iMouseLocation = glGetUniformLocation(_programHandle, "iMouse");
+			matrixTransformLocation = glGetUniformLocation(_programHandle, "matrixTransform");
+
+			userPosLocation = glGetUniformLocation(_programHandle, "userPos");
+			userForwardDirLocation = glGetUniformLocation(_programHandle, "userForwardDir");
+			userUpDirLocation = glGetUniformLocation(_programHandle, "userUpDir");
+			userRightDirLocation = glGetUniformLocation(_programHandle, "userRightDir");
         }
     }
     
     void onRenderGraphicsScene(const VRGraphicsState& state) {
         // clear screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        
-
-		GLint iResolutionLocation = glGetUniformLocation(_programHandle, "iResolution");
-		GLint iTimeLocation = glGetUniformLocation(_programHandle, "iTime");
-		GLint iMouseLocation = glGetUniformLocation(_programHandle, "iMouse");
-		GLint matrixTransformLocation = glGetUniformLocation(_programHandle, "matrixTransform");
-
-		GLint a = glGetUniformLocation(_programHandle, "userPos");
-		GLint b = glGetUniformLocation(_programHandle, "userForwardDir");
-		GLint c = glGetUniformLocation(_programHandle, "userUpDir");
-		GLint d = glGetUniformLocation(_programHandle, "userRightDir");
-        
-		vec4 userPos = { 0, 1, 0, 0 };
-		vec4 userForwardDir = { 1, 0, 0, 0 };
-		vec4 userUpDir = { 0, 0, 0, 1 };
-		vec4 userRightDir = { 0, 0, 1, 0 };
 
 		glUniform3f(iResolutionLocation, 100, 100, 0);
 		glUniform1f(iTimeLocation, 0);
 		glUniform4f(iMouseLocation, 0, 0, 0, 0);
 
-		glUniform4f(a, userPos.x, userPos.y, userPos.z, userPos.w);
-		glUniform4f(b, userForwardDir.x, userForwardDir.y, userForwardDir.z, userForwardDir.w);
-		glUniform4f(c, userUpDir.x, userUpDir.y, userUpDir.z, userUpDir.w);
-		glUniform4f(d, userRightDir.x, userRightDir.y, userRightDir.z, userRightDir.w);
+		glUniform4f(userPosLocation, userPos.x, userPos.y, userPos.z, userPos.w);
+		glUniform4f(userForwardDirLocation, userForwardDir.x, userForwardDir.y, userForwardDir.z, userForwardDir.w);
+		glUniform4f(userUpDirLocation, userUpDir.x, userUpDir.y, userUpDir.z, userUpDir.w);
+		glUniform4f(userRightDirLocation, userRightDir.x, userRightDir.y, userRightDir.z, userRightDir.w);
 
 		glDrawElements(GL_TRIANGLE_STRIP, _numIndices, GL_UNSIGNED_INT, 0);
         
@@ -238,6 +229,23 @@ private:
 	GLuint _indexVBO;
 	GLsizei _numIndices;
 	GLuint _programHandle;
+
+	vec4 userPos = { 0, 1, 0, 0 };
+	vec4 userForwardDir = { 1, 0, 0, 0 };
+	vec4 userUpDir = { 0, 0, 0, 1 };
+	vec4 userRightDir = { 0, 0, 1, 0 };
+
+	float movementSpeed = 0.04;
+	float lookAroundSensitivity = 0.003;
+
+	GLint iResolutionLocation;
+	GLint iTimeLocation;
+	GLint iMouseLocation;
+	GLint matrixTransformLocation;
+	GLint userPosLocation;
+	GLint userForwardDirLocation;
+	GLint userUpDirLocation;
+	GLint userRightDirLocation;
 };
 
 
