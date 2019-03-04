@@ -29,17 +29,21 @@ using namespace MinVR;
 // This is not required for use of MinVR in general
 #include <math/VRMath.h>
 
-struct vec3 {
-	float x;
-	float y;
-	float z;
-};
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/epsilon.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+using namespace glm;
 
-struct vec4 {
-	float x;
-	float y;
-	float z;
-	float w;
+struct CameraInfo {
+	mat4 previousRealWorldViewMatrix;
+
+	vec4 pos;
+	vec4 forwardDir;
+	vec4 upDir;
+	vec4 rightDir;
 };
 
 /**
@@ -150,20 +154,121 @@ public:
 			userUpDirLocation = glGetUniformLocation(_programHandle, "userUpDir");
 			userRightDirLocation = glGetUniformLocation(_programHandle, "userRightDir");
         }
+
+		/*
+		if (keyDown(GLFW_KEY_W)) {
+			moveInDir(userPos, userForwardDir, movementSpeed);
+		}
+		if (keyDown(GLFW_KEY_S)) {
+			moveInDir(userPos, userForwardDir, -movementSpeed);
+		}
+
+		if (keyDown(GLFW_KEY_A)) {
+			moveInDir(userPos, userRightDir, -movementSpeed);
+		}
+		if (keyDown(GLFW_KEY_D)) {
+			moveInDir(userPos, userRightDir, movementSpeed);
+		}
+
+		vec2 cursorDiff = getCursorDiff();
+		if (cursorDiff.x != 0) {
+			if (mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT) || mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+				moveInDir(userUpDir, userRightDir, cursorDiff.x * lookAroundSensitivity);
+			}
+			else {
+				moveInDir(userForwardDir, userRightDir, cursorDiff.x * lookAroundSensitivity);
+			}
+
+		}
+
+		if (cursorDiff.y != 0) {
+			if (mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT) || mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+				//Do nothing so that when the button is held down the user can't also look up/down
+			}
+			else {
+				moveInDir(userForwardDir, userUpDir, -cursorDiff.y * lookAroundSensitivity);
+			}
+		}
+		*/
     }
     
     void onRenderGraphicsScene(const VRGraphicsState& state) {
         // clear screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glUniform3f(iResolutionLocation, 100, 100, 0);
+		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
+
+		if (state.isInitialRenderCall()) {
+			CameraInfo inf = { curViewMatrix, vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
+			cameraInfos[state.getWindowId()] = inf;
+		}
+
+		CameraInfo* thisCameraInfo = &cameraInfos.at(state.getWindowId());
+
+		/*
+		D * O * p = N * p
+		D * O = N
+		D = N * O^-1
+		*/
+		//changeMatrix is a view matrix from the old matrix to the new one
+		mat4 changeMatrix = curViewMatrix * inverse(thisCameraInfo->previousRealWorldViewMatrix);
+
+
+		vec3 changeMat_scale;
+		quat changeMat_rotation;
+		vec3 changeMat_translation;
+		vec3 changeMat_skew;
+		vec4 changeMat_perspective;
+		glm::decompose(changeMatrix, changeMat_scale, changeMat_rotation, changeMat_translation, changeMat_skew, changeMat_perspective);
+
+		if (!state.isInitialRenderCall()) {
+			if (glm::any(glm::epsilonNotEqual(changeMat_scale, vec3(1), 0.0001f))) {
+				DebugBreak();
+			}
+			if (glm::any(glm::epsilonNotEqual(changeMat_skew, vec3(0), 0.0001f))) {
+				DebugBreak();
+			}
+			if (glm::any(glm::epsilonNotEqual(changeMat_perspective, vec4(0,0,0,1), 0.0001f))) {
+				DebugBreak();
+			}
+		}
+
+		//// http://www.euclideanspace.com/maths/geometry/rotations/theory/nDimensions/index.htm
+		//// http://marctenbosch.com/news/2011/05/4d-rotations-and-the-4d-equivalent-of-quaternions/
+		//// https://en.wikipedia.org/wiki/Plane_of_rotation
+		//// https://www.youtube.com/watch?v=PNlgMPzj-7Q&list=PLpzmRsG7u_gqaTo_vEseQ7U8KFvtiJY4K
+		//// http://wscg.zcu.cz/wscg2004/Papers_2004_Short/N29.pdf
+		//vec4 rotDir = normalize((thisCameraInfo->rightDir * posRelativeToPreviousPos.x) +
+		//	(thisCameraInfo->upDir * posRelativeToPreviousPos.y) +
+		//	(thisCameraInfo->forwardDir * posRelativeToPreviousPos.z));
+		//float rotAmnt = length(posRelativeToPreviousPos);
+
+		// Move position in virtual world
+		moveInDir(thisCameraInfo->pos, thisCameraInfo->rightDir, changeMat_translation.x);
+		moveInDir(thisCameraInfo->pos, thisCameraInfo->upDir, changeMat_translation.y);
+		moveInDir(thisCameraInfo->pos, thisCameraInfo->forwardDir, changeMat_translation.z);
+
+		// Rotate in virtual world
+		vec3 changeMat_eulerAngles = eulerAngles(changeMat_rotation);
+		moveInDir(thisCameraInfo->rightDir, thisCameraInfo->upDir, changeMat_eulerAngles.z);
+		moveInDir(thisCameraInfo->forwardDir, thisCameraInfo->rightDir, changeMat_eulerAngles.y);
+		moveInDir(thisCameraInfo->upDir, thisCameraInfo->forwardDir, changeMat_eulerAngles.x);
+
+		// Update camera info
+		thisCameraInfo->previousRealWorldViewMatrix = curViewMatrix;
+
+		// Setup uniforms
+		//TODO: fix this
+		int width=1024, height=1024;
+
+		glUniform3f(iResolutionLocation, width, height, 0);
 		glUniform1f(iTimeLocation, 0);
 		glUniform4f(iMouseLocation, 0, 0, 0, 0);
 
-		glUniform4f(userPosLocation, userPos.x, userPos.y, userPos.z, userPos.w);
-		glUniform4f(userForwardDirLocation, userForwardDir.x, userForwardDir.y, userForwardDir.z, userForwardDir.w);
-		glUniform4f(userUpDirLocation, userUpDir.x, userUpDir.y, userUpDir.z, userUpDir.w);
-		glUniform4f(userRightDirLocation, userRightDir.x, userRightDir.y, userRightDir.z, userRightDir.w);
+		setUniform(userPosLocation, thisCameraInfo->pos);
+		setUniform(userForwardDirLocation, thisCameraInfo->forwardDir);
+		setUniform(userUpDirLocation, thisCameraInfo->upDir);
+		setUniform(userRightDirLocation, thisCameraInfo->rightDir);
 
 		glDrawElements(GL_TRIANGLE_STRIP, _numIndices, GL_UNSIGNED_INT, 0);
         
@@ -172,6 +277,9 @@ public:
     
     void onRenderHaptics(const VRHapticsState& state) {}
     
+	void setUniform(GLint location, vec4 vector) {
+		glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
+	}
     
 	GLuint loadAndCompileShader(const std::string& pathToFile, GLuint shaderType) {
 		std::ifstream inFile(pathToFile, std::ios::in);
@@ -221,6 +329,15 @@ public:
 			std::cerr << "Error compiling program: " << &log[0] << std::endl;
 		}
 	}
+
+	void moveInDir(vec4& position, vec4& direction, float angle)
+	{
+		vec4 newPosition = (cos(angle) * position) + (sin(angle) * direction);
+		vec4 newDirection = (cos(angle) * direction) + (sin(angle) * -position);
+
+		position = newPosition;
+		direction = newDirection;
+	}
     
 
 private:
@@ -230,13 +347,7 @@ private:
 	GLsizei _numIndices;
 	GLuint _programHandle;
 
-	vec4 userPos = { 0, 1, 0, 0 };
-	vec4 userForwardDir = { 1, 0, 0, 0 };
-	vec4 userUpDir = { 0, 0, 0, 1 };
-	vec4 userRightDir = { 0, 0, 1, 0 };
-
-	float movementSpeed = 0.04;
-	float lookAroundSensitivity = 0.003;
+	std::map<int, CameraInfo> cameraInfos = std::map<int, CameraInfo>();
 
 	GLint iResolutionLocation;
 	GLint iTimeLocation;
