@@ -144,10 +144,8 @@ public:
             linkShaderProgram(_programHandle);
 			glUseProgram(_programHandle);
 
-			iResolutionLocation = glGetUniformLocation(_programHandle, "iResolution");
-			iTimeLocation = glGetUniformLocation(_programHandle, "iTime");
-			iMouseLocation = glGetUniformLocation(_programHandle, "iMouse");
-			matrixTransformLocation = glGetUniformLocation(_programHandle, "matrixTransform");
+			viewportResolutionLocation = glGetUniformLocation(_programHandle, "viewportResolution");
+			inversePerspectiveMatLocation = glGetUniformLocation(_programHandle, "inversePerspectiveMat");
 
 			userPosLocation = glGetUniformLocation(_programHandle, "userPos");
 			userForwardDirLocation = glGetUniformLocation(_programHandle, "userForwardDir");
@@ -259,11 +257,10 @@ public:
 
 		// Setup uniforms
 		//TODO: fix this
-		int width=1024, height=1024;
+		glUniform2f(viewportResolutionLocation, 1024, 1024);
 
-		glUniform3f(iResolutionLocation, width, height, 0);
-		glUniform1f(iTimeLocation, 0);
-		glUniform4f(iMouseLocation, 0, 0, 0, 0);
+		mat4 projMat = make_mat4(state.getProjectionMatrix());
+		setUniform(inversePerspectiveMatLocation, inverse(projMat), GL_FALSE);
 
 		setUniform(userPosLocation, thisCameraInfo->pos);
 		setUniform(userForwardDirLocation, thisCameraInfo->forwardDir);
@@ -277,6 +274,10 @@ public:
     
     void onRenderHaptics(const VRHapticsState& state) {}
     
+	void setUniform(GLint location, glm::mat4& matrix, GLboolean transpose) {
+		glUniformMatrix4fv(location, 1, transpose, &(matrix[0][0]));
+	}
+
 	void setUniform(GLint location, vec4 vector) {
 		glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
 	}
@@ -349,17 +350,13 @@ private:
 
 	std::map<int, CameraInfo> cameraInfos = std::map<int, CameraInfo>();
 
-	GLint iResolutionLocation;
-	GLint iTimeLocation;
-	GLint iMouseLocation;
-	GLint matrixTransformLocation;
+	GLint viewportResolutionLocation;
+	GLint inversePerspectiveMatLocation;
 	GLint userPosLocation;
 	GLint userForwardDirLocation;
 	GLint userUpDirLocation;
 	GLint userRightDirLocation;
 };
-
-
 
 /// Main method which creates and calls application
 int main(int argc, char **argv) {

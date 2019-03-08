@@ -1,6 +1,7 @@
 #version 330
 
-uniform vec3 iResolution; // viewport resolution (in pixels)
+uniform vec2 viewportResolution; // viewport resolution (in pixels)
+uniform mat4 inversePerspectiveMat;
 
 uniform vec4 userPos;
 uniform vec4 userForwardDir;
@@ -23,7 +24,6 @@ const float MIN_RAY_HIT_THRESHOLD = 0.001;
 
 //////////////////////////// RAYTRACER PARAMS ////////////////////////////
 
-float zoom = 500.0;
 const int AA_AMOUNT = 1;
 const int REFLECTION_COUNT = 4;
 const float REFLECTANCE = 0.6;
@@ -35,8 +35,6 @@ const vec4 LIGHT_POSITION = normalize(vec4(1.,0.,0., 0.25));
 
 const vec3 BACKGROUND_COLOR = vec3(0);
 const bool USER_SPHERE_VISIBLE = true;
-
-
 
 
 ///////////////////////////// UTILITY METHODS ////////////////////////////
@@ -416,11 +414,11 @@ vec3 RayColor(Ray ray)
 
 vec4 ColorAt(vec2 pixelCoord)
 {
-    //Generate ray
-    vec2 adjPixel = pixelCoord - iResolution.xy/2.;
-    
-    //TODO: do this more accurately (or check that it's accurate)
-    vec4 rayDir = normalize(userForwardDir + (adjPixel.x/zoom * userRightDir) + (adjPixel.y/zoom * userUpDir));
+	// https://stackoverflow.com/questions/2354821/raycasting-how-to-properly-apply-a-projection-matrix
+    vec2 pixCoordNDC = (pixelCoord / (viewportResolution / 2.0)) - vec2(1.0);
+	vec4 rev_persp = vec4(pixCoordNDC, -1, 1);
+    vec4 world_ray = inversePerspectiveMat * rev_persp;
+    vec4 rayDir = normalize((world_ray.x * userRightDir) + (world_ray.y * userUpDir) + (-world_ray.z * userForwardDir));
 
     Ray ray = Ray(normalize(userPos), normalize(rayDir));
     
@@ -434,8 +432,6 @@ vec4 ColorAt(vec2 pixelCoord)
 
 void main()
 {
-    zoom *= iResolution.x / 1000.;
-    
     fragColor = vec4(0.0);
     
     //antialiasing
