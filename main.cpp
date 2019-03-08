@@ -256,8 +256,9 @@ public:
 		thisCameraInfo->previousRealWorldViewMatrix = curViewMatrix;
 
 		// Setup uniforms
-		//TODO: fix this
-		glUniform2f(viewportResolutionLocation, 1024, 1024);
+		GLfloat windowHeight = state.index().getValue("FramebufferHeight");
+		GLfloat windowWidth = state.index().getValue("FramebufferWidth");
+		glUniform2f(viewportResolutionLocation, windowWidth, windowHeight);
 
 		mat4 projMat = make_mat4(state.getProjectionMatrix());
 		setUniform(inversePerspectiveMatLocation, inverse(projMat), GL_FALSE);
