@@ -17,14 +17,14 @@ out vec4 fragColor;
 
 const float PI = 3.1415926535897932384626433832795;
 const float TWO_PI = 2. * PI;
-bool debug_overrideColor = false;
+//bool debug_overrideColor = false;
 
 const float MIN_RAY_HIT_THRESHOLD = 0.001;
 
 
 //////////////////////////// RAYTRACER PARAMS ////////////////////////////
 
-const int AA_AMOUNT = 1;
+//const int AA_AMOUNT = 1;
 const int REFLECTION_COUNT = 4;
 const float REFLECTANCE = 0.6;
 
@@ -418,7 +418,7 @@ vec4 ColorAt(vec2 pixelCoord)
     vec2 pixCoordNDC = (pixelCoord / (viewportResolution / 2.0)) - vec2(1.0);
 	vec4 rev_persp = vec4(pixCoordNDC, -1, 1);
     vec4 world_ray = inversePerspectiveMat * rev_persp;
-    vec4 rayDir = normalize((world_ray.x * userRightDir) + (world_ray.y * userUpDir) + (-world_ray.z * userForwardDir));
+    vec4 rayDir = (world_ray.x * userRightDir) + (world_ray.y * userUpDir) + (-world_ray.z * userForwardDir);
 
     Ray ray = Ray(normalize(userPos), normalize(rayDir));
     
@@ -432,20 +432,21 @@ vec4 ColorAt(vec2 pixelCoord)
 
 void main()
 {
-    fragColor = vec4(0.0);
+    //fragColor = vec4(0.0);
     
     //antialiasing
-    for(float x = 0.; x < 1.; x += 1. / float(AA_AMOUNT))
-    {
-        for(float y = 0.; y < 1.; y += 1. / float(AA_AMOUNT))
-        {    
-            fragColor += ColorAt(gl_FragCoord.xy + vec2(x, y));    
-        }
-    }
-    fragColor /= float(AA_AMOUNT * AA_AMOUNT);
+    // for(float x = 0.; x < 1.; x += 1. / float(AA_AMOUNT))
+    // {
+    //     for(float y = 0.; y < 1.; y += 1. / float(AA_AMOUNT))
+    //     {    
+    //         fragColor += ColorAt(gl_FragCoord.xy + vec2(x, y));    
+    //     }
+    // }
+    // fragColor /= float(AA_AMOUNT * AA_AMOUNT);
+    fragColor = ColorAt(gl_FragCoord.xy);
     
-    if(debug_overrideColor)
-    {
-        fragColor = vec4(1., 0., 1., 1.);
-    }
+    // if(debug_overrideColor)
+    // {
+    //     fragColor = vec4(1., 0., 1., 1.);
+    // }
 }
