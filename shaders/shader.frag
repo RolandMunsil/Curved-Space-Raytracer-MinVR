@@ -1,7 +1,7 @@
 #version 330
 
 uniform vec2 viewportResolution; // viewport resolution (in pixels)
-uniform mat4 inversePerspectiveMat;
+uniform mat4 projectionMat;
 
 uniform vec4 userPos;
 uniform vec4 userForwardDir;
@@ -414,10 +414,12 @@ vec3 RayColor(Ray ray)
 
 vec4 ColorAt(vec2 pixelCoord)
 {
-	// https://stackoverflow.com/questions/2354821/raycasting-how-to-properly-apply-a-projection-matrix
+    mat4 invProjMat = inverse(projectionMat);
+    float near_z = projectionMat[3][2] / (projectionMat[2][2] - 1.0);
+
     vec2 pixCoordNDC = (pixelCoord / (viewportResolution / 2.0)) - vec2(1.0);
-	vec4 rev_persp = vec4(pixCoordNDC, -1, 1);
-    vec4 world_ray = inversePerspectiveMat * rev_persp;
+	vec4 rev_persp = vec4(pixCoordNDC*near_z, -near_z, near_z);
+    vec4 world_ray = invProjMat * rev_persp;
     vec4 rayDir = (world_ray.x * userRightDir) + (world_ray.y * userUpDir) + (-world_ray.z * userForwardDir);
 
     Ray ray = Ray(normalize(userPos), normalize(rayDir));
