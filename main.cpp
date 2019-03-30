@@ -268,69 +268,6 @@ public:
 		setUniform(userUpDirLocation, thisCameraInfo->upDir);
 		setUniform(userRightDirLocation, thisCameraInfo->rightDir);
 
-		/*{
-			vec2 pixelCoord = vec2(0);
-
-			vec2 viewportResolution = vec2(windowWidth, windowHeight);
-
-			vec4 userPos = thisCameraInfo->pos;
-			vec4 userForwardDir = thisCameraInfo->forwardDir;
-			vec4 userUpDir = thisCameraInfo->upDir;
-			vec4 userRightDir = thisCameraInfo->rightDir;
-
-			mat4 invProjMat = inverse(projectionMat);
-			float near_z = projectionMat[3][2] / (projectionMat[2][2] - 1.0);
-			float far_z = projectionMat[3][2] / (projectionMat[2][2] + 1.0);
-
-			vec2 pixCoordNDC = (pixelCoord / (viewportResolution / 2.0f)) - vec2(1.0);
-			vec4 rev_persp = vec4(pixCoordNDC*near_z, -near_z, near_z);
-			vec4 world_ray = invProjMat * rev_persp;
-
-
-			vec3 world_ray_n = normalize(vec3(world_ray));
-
-			vec4 rev_persp_from_far = vec4(pixCoordNDC*far_z, far_z, far_z);
-			vec4 world_ray_from_far = invProjMat * rev_persp_from_far;
-			vec3 world_ray_from_far_n = normalize(vec3(world_ray_from_far));
-
-			vec4 rayDir = (world_ray.x * userRightDir) + (world_ray.y * userUpDir) + (-world_ray.z * userForwardDir);
-		}
-
-		{
-			vec2 pixelCoord = vec2(0);
-
-			vec2 viewportResolution = vec2(windowWidth, windowHeight);
-			mat4 inversePerspectiveMat = inverse(projectionMat);
-
-			vec4 userPos = thisCameraInfo->pos;
-			vec4 userForwardDir = thisCameraInfo->forwardDir;
-			vec4 userUpDir = thisCameraInfo->upDir;
-			vec4 userRightDir = thisCameraInfo->rightDir;
-
-			vec2 pixCoordNDC = (pixelCoord / (viewportResolution / 2.0f)) - vec2(1.0);
-			vec4 rev_persp = vec4(pixCoordNDC, -1, 1);
-			vec4 world_ray = inversePerspectiveMat * rev_persp;
-
-
-			mat4 simpleTestMat = glm::perspective(glm::radians(90.0f), 1.0f, 2.0f, 100.0f);
-			vec4 nearTest = simpleTestMat * vec4(2, 2, -2, 1);
-			vec4 farTest = simpleTestMat * vec4(100, 100, -100, 1);
-
-			float n = simpleTestMat[3][2] / (simpleTestMat[2][2] - 1.0);
-			float f = simpleTestMat[3][2] / (simpleTestMat[2][2] + 1.0);
-
-			float n2 = projectionMat[3][2] / (projectionMat[2][2] - 1.0);
-			float f2 = projectionMat[3][2] / (projectionMat[2][2] + 1.0);
-
-			vec4 rev_persp2 = vec4(0, 0, -n2, n2);
-			vec4 world_ray2 = inversePerspectiveMat * rev_persp2;
-
-			vec4 rev_persp3 = vec4(pixCoordNDC, -n2, n2);
-			vec4 world_ray3 = inversePerspectiveMat * rev_persp3;
-
-			vec4 rayDir = (world_ray.x * userRightDir) + (world_ray.y * userUpDir) + (-world_ray.z * userForwardDir);
-		}*/
-
 		glDrawElements(GL_TRIANGLE_STRIP, _numIndices, GL_UNSIGNED_INT, 0);
         
     }
