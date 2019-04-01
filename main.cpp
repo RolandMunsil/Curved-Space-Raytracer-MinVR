@@ -219,18 +219,6 @@ public:
 		vec4 changeMat_perspective;
 		glm::decompose(changeMatrix, changeMat_scale, changeMat_rotation, changeMat_translation, changeMat_skew, changeMat_perspective);
 
-		if (!state.isInitialRenderCall()) {
-			if (glm::any(glm::epsilonNotEqual(changeMat_scale, vec3(1), 0.0001f))) {
-				DebugBreak();
-			}
-			if (glm::any(glm::epsilonNotEqual(changeMat_skew, vec3(0), 0.0001f))) {
-				DebugBreak();
-			}
-			if (glm::any(glm::epsilonNotEqual(changeMat_perspective, vec4(0,0,0,1), 0.0001f))) {
-				DebugBreak();
-			}
-		}
-
 		//// http://www.euclideanspace.com/maths/geometry/rotations/theory/nDimensions/index.htm
 		//// http://marctenbosch.com/news/2011/05/4d-rotations-and-the-4d-equivalent-of-quaternions/
 		//// https://en.wikipedia.org/wiki/Plane_of_rotation
