@@ -352,7 +352,7 @@ public:
 				}
 			}
 
-			//Rotate vectors not orthogonal but not in plane
+			//////////// Rotate vectors not orthogonal but not in plane ////////////
 			{
 				vec4 fromVec = vec4(1, 0, 0, 0);
 				vec4 toVec = vec4(0, 1, 0, 0);
@@ -372,6 +372,57 @@ public:
 				vec4 desiredVec = vec4(-1, 0, 2, 1);
 
 				rotate4DSinglePlane(fromVec, toVec, { &testVec });
+				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+					throw std::exception();
+				}
+			}
+
+			//////////// With specific angle ////////////
+
+			{
+				vec4 fromVec = vec4(1, 0, 0, 0);
+				vec4 toVec = vec4(0, 1, 0, 0);
+				float angle = radians(45.0);
+				vec4 testVec = vec4(1, 0, 0, 0);
+				vec4 desiredVec = normalize(vec4(1, 1, 0, 0));
+
+				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
+				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+					throw std::exception();
+				}
+			}
+			{
+				vec4 fromVec = vec4(1, 0, 0, 0);
+				vec4 toVec = vec4(0, 1, 0, 0);
+				float angle = radians(-45.0);
+				vec4 testVec = vec4(1, 0, 0, 0);
+				vec4 desiredVec = normalize(vec4(1, -1, 0, 0));
+
+				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
+				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+					throw std::exception();
+				}
+			}
+			{
+				vec4 fromVec = vec4(1, 0, 0, 0);
+				vec4 toVec = vec4(0, 1, 0, 0);
+				float angle = radians(-90.0);
+				vec4 testVec = vec4(1, 0, 0, 0);
+				vec4 desiredVec = normalize(vec4(0, -1, 0, 0));
+
+				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
+				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+					throw std::exception();
+				}
+			}
+			{
+				vec4 fromVec = vec4(1, 0, 0, 0);
+				vec4 toVec = vec4(0, 1, 0, 0);
+				float angle = radians(30.0);
+				vec4 testVec = vec4(1, 0, 0, 0);
+				vec4 desiredVec = normalize(vec4(cos(radians(30.0)), 0.5, 0, 0));
+
+				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
 				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
 					throw std::exception();
 				}
@@ -457,12 +508,17 @@ public:
     void onRenderHaptics(const VRHapticsState& state) {}
 
 	void rotate4DSinglePlane(vec4 fromVector, vec4 toVector, std::vector<vec4*> vectorsToRotate) {
+		float rotationAngle = acos(dot(fromVector, toVector));
+		rotate4DSinglePlaneSpecificAngle(fromVector, toVector, rotationAngle, vectorsToRotate);
+	}
+
+	void rotate4DSinglePlaneSpecificAngle(vec4 fromVector, vec4 toVector, float angle, std::vector<vec4*> vectorsToRotate) {
 		fromVector = normalize(fromVector);
 		toVector = normalize(toVector);
 
-		float rotationAngle = acos(dot(fromVector, toVector));
+		float rotationAngle = angle;
 
-		if (rotationAngle < radians(0.0001)) {
+		if (abs(rotationAngle) < radians(0.0001)) {
 			//from and to are likely the same, so just return
 			return;
 		}
@@ -472,11 +528,10 @@ public:
 		if (any(isnan(perp_toVector))) {
 			throw std::exception();
 		}
-
 		if (abs(dot(perp_toVector, fromVector)) > 0.0001) {
 			throw std::exception();
 		}
-		if (abs(length(perp_toVector)-1) > 0.0001) {
+		if (abs(length(perp_toVector) - 1) > 0.0001) {
 			throw std::exception();
 		}
 
@@ -486,7 +541,7 @@ public:
 			float to_scalar_component = dot(orig_vec, perp_toVector);
 			float from_scalar_component = dot(orig_vec, fromVector);
 
-			vec4 ortho_component = orig_vec - (from_scalar_component*fromVector + to_scalar_component*perp_toVector);
+			vec4 ortho_component = orig_vec - (from_scalar_component*fromVector + to_scalar_component * perp_toVector);
 
 			if (abs(dot(ortho_component, fromVector)) > 0.0001) {
 				throw std::exception();
