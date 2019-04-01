@@ -197,7 +197,7 @@ public:
 		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
 
 		if (state.isInitialRenderCall()) {
-			CameraInfo inf = { curViewMatrix, vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
+			CameraInfo inf = { mat4(1.0), vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
 			cameraInfos[state.getWindowId()] = inf;
 		}
 
