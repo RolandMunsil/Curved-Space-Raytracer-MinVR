@@ -152,42 +152,6 @@ public:
 			userUpDirLocation = glGetUniformLocation(_programHandle, "userUpDir");
 			userRightDirLocation = glGetUniformLocation(_programHandle, "userRightDir");
         }
-
-		/*
-		if (keyDown(GLFW_KEY_W)) {
-			moveInDir(userPos, userForwardDir, movementSpeed);
-		}
-		if (keyDown(GLFW_KEY_S)) {
-			moveInDir(userPos, userForwardDir, -movementSpeed);
-		}
-
-		if (keyDown(GLFW_KEY_A)) {
-			moveInDir(userPos, userRightDir, -movementSpeed);
-		}
-		if (keyDown(GLFW_KEY_D)) {
-			moveInDir(userPos, userRightDir, movementSpeed);
-		}
-
-		vec2 cursorDiff = getCursorDiff();
-		if (cursorDiff.x != 0) {
-			if (mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT) || mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-				moveInDir(userUpDir, userRightDir, cursorDiff.x * lookAroundSensitivity);
-			}
-			else {
-				moveInDir(userForwardDir, userRightDir, cursorDiff.x * lookAroundSensitivity);
-			}
-
-		}
-
-		if (cursorDiff.y != 0) {
-			if (mouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT) || mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-				//Do nothing so that when the button is held down the user can't also look up/down
-			}
-			else {
-				moveInDir(userForwardDir, userUpDir, -cursorDiff.y * lookAroundSensitivity);
-			}
-		}
-		*/
     }
     
     void onRenderGraphicsScene(const VRGraphicsState& state) {
