@@ -435,14 +435,20 @@ public:
 		// clear screen
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+		int windowId = state.getWindowId();
+		if (((VRString)state.index().getValue("Eye")) == "Left") {
+			// So that left and right eye will get treated separately
+			windowId += 0xF0;
+		}
+
 		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
 
 		if (state.isInitialRenderCall()) {
 			CameraInfo inf = { mat4(1.0), vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
-			cameraInfos[state.getWindowId()] = inf;
+			cameraInfos[windowId] = inf;
 		}
 
-		CameraInfo* thisCameraInfo = &cameraInfos.at(state.getWindowId());
+		CameraInfo* thisCameraInfo = &cameraInfos.at(windowId);
 
 		/*
 		D * O * p = N * p
