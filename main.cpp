@@ -480,14 +480,23 @@ public:
 
 
 		// Rotate view in virtual world
+		vec3 rotatedRightVector = changeMat_rotation * vec3(1, 0, 0);
+		vec3 rotatedUpVector = changeMat_rotation * vec3(0, 1, 0);
 		vec3 rotatedForwardVector = changeMat_rotation * vec3(0, 0, 1);
-		vec4 rotationDirection = normalize(
-			(thisCameraInfo->rightDir * rotatedForwardVector.x) +
-			(thisCameraInfo->upDir * rotatedForwardVector.y) +
-			(thisCameraInfo->forwardDir * rotatedForwardVector.z));
 
-		rotate4DSinglePlane(thisCameraInfo->forwardDir, rotationDirection,
-			{ &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
+		mat3x4 matWithDirsAsBases(thisCameraInfo->rightDir, thisCameraInfo->upDir, thisCameraInfo->forwardDir);
+
+		thisCameraInfo->rightDir = matWithDirsAsBases * rotatedRightVector;
+		thisCameraInfo->upDir = matWithDirsAsBases * rotatedUpVector;
+		thisCameraInfo->forwardDir = matWithDirsAsBases * rotatedForwardVector;
+
+		//vec4 rotationDirection = normalize(
+		//	(thisCameraInfo->rightDir * rotatedForwardVector.x) +
+		//	(thisCameraInfo->upDir * rotatedForwardVector.y) +
+		//	(thisCameraInfo->forwardDir * rotatedForwardVector.z));
+
+		//rotate4DSinglePlane(thisCameraInfo->forwardDir, rotationDirection,
+		//	{ &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
 
 		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->forwardDir)) > 0.0001) {
 			throw std::exception();
