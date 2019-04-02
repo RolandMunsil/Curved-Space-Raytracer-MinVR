@@ -460,21 +460,16 @@ public:
 		vec4 changeMat_perspective;
 		glm::decompose(changeMatrix, changeMat_scale, changeMat_rotation, changeMat_translation, changeMat_skew, changeMat_perspective);
 
-		//// http://www.euclideanspace.com/maths/geometry/rotations/theory/nDimensions/index.htm
-		//// http://marctenbosch.com/news/2011/05/4d-rotations-and-the-4d-equivalent-of-quaternions/
-		//// https://en.wikipedia.org/wiki/Plane_of_rotation
-		//// https://www.youtube.com/watch?v=PNlgMPzj-7Q&list=PLpzmRsG7u_gqaTo_vEseQ7U8KFvtiJY4K
-		//// http://wscg.zcu.cz/wscg2004/Papers_2004_Short/N29.pdf
-
 		float user_scale = 1;
 
-		vec4 rotDir = normalize((thisCameraInfo->rightDir * changeMat_translation.x) +
+		vec4 moveDirection = normalize(
+			(thisCameraInfo->rightDir * changeMat_translation.x) +
 			(thisCameraInfo->upDir * changeMat_translation.y) +
 			(thisCameraInfo->forwardDir * changeMat_translation.z));
-		float rotAmnt = user_scale * length(changeMat_translation);
+		float moveAmount = user_scale * length(changeMat_translation);
 
-		//Move position
-		rotate4DSinglePlaneSpecificAngle(thisCameraInfo->pos, rotDir, rotAmnt,
+		// Move position in virtual world
+		rotate4DSinglePlaneSpecificAngle(thisCameraInfo->pos, moveDirection, moveAmount,
 			{ &thisCameraInfo->pos, &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
 
 		//get orthographic to plane: rotDir - rotDir_projected_onto_pos
@@ -485,11 +480,31 @@ public:
 		//moveInDir(thisCameraInfo->pos, thisCameraInfo->upDir, changeMat_translation.y);
 		//moveInDir(thisCameraInfo->pos, thisCameraInfo->forwardDir, changeMat_translation.z);
 
+		vec3 rotatedForwardVector = changeMat_rotation * vec3(0, 0, 1);
+		vec4 rotationDirection = normalize(
+			(thisCameraInfo->rightDir * rotatedForwardVector.x) +
+			(thisCameraInfo->upDir * rotatedForwardVector.y) +
+			(thisCameraInfo->forwardDir * rotatedForwardVector.z));
+
+		// Rotate view in virtual world
+		rotate4DSinglePlane(thisCameraInfo->forwardDir, rotationDirection,
+			{ &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
+
+		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->forwardDir)) > 0.0001) {
+			throw std::exception();
+		}
+		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->upDir)) > 0.0001) {
+			throw std::exception();
+		}
+		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->rightDir)) > 0.0001) {
+			throw std::exception();
+		}
+
 		// Rotate in virtual world
-		vec3 changeMat_eulerAngles = eulerAngles(changeMat_rotation);
-		moveInDir(thisCameraInfo->rightDir, thisCameraInfo->upDir, changeMat_eulerAngles.z);
-		moveInDir(thisCameraInfo->forwardDir, thisCameraInfo->rightDir, changeMat_eulerAngles.y);
-		moveInDir(thisCameraInfo->upDir, thisCameraInfo->forwardDir, changeMat_eulerAngles.x);
+		//vec3 changeMat_eulerAngles = eulerAngles(changeMat_rotation);
+		//moveInDir(thisCameraInfo->rightDir, thisCameraInfo->upDir, changeMat_eulerAngles.z);
+		//moveInDir(thisCameraInfo->forwardDir, thisCameraInfo->rightDir, changeMat_eulerAngles.y);
+		//moveInDir(thisCameraInfo->upDir, thisCameraInfo->forwardDir, changeMat_eulerAngles.x);
 
 		// Update camera info
 		thisCameraInfo->previousRealWorldViewMatrix = curViewMatrix;
@@ -515,30 +530,55 @@ public:
     void onRenderHaptics(const VRHapticsState& state) {}
 
 	void rotate4DSinglePlane(vec4 fromVector, vec4 toVector, std::vector<vec4*> vectorsToRotate) {
-		float rotationAngle = acos(dot(fromVector, toVector));
+		if (abs(length(fromVector) - 1) > 0.0001) {
+			throw std::exception();
+		}
+		if (abs(length(toVector) - 1) > 0.0001) {
+			throw std::exception();
+		}
+
+		fromVector = normalize(fromVector);
+		toVector = normalize(toVector);
+
+		// Clamp for cases where a vector is *slightly* longer than 1
+		float rotationAngle = acos(clamp(dot(fromVector, toVector), -1.0f, 1.0f));
 		rotate4DSinglePlaneSpecificAngle(fromVector, toVector, rotationAngle, vectorsToRotate);
 	}
 
 	void rotate4DSinglePlaneSpecificAngle(vec4 fromVector, vec4 toVector, float angle, std::vector<vec4*> vectorsToRotate) {
+		if (abs(length(fromVector) - 1) > 0.0001) {
+			throw std::exception();
+		}
+		if (abs(length(toVector) - 1) > 0.0001) {
+			throw std::exception();
+		}
+		
 		fromVector = normalize(fromVector);
 		toVector = normalize(toVector);
 
 		float rotationAngle = angle;
 
-		if (abs(rotationAngle) < radians(0.0001)) {
+		if (abs(rotationAngle) < radians(0.00001)) {
 			//from and to are likely the same, so just return
 			return;
 		}
 
-		vec4 perp_toVector = normalize(toVector - proj(toVector, fromVector));
+		vec4 non_norm_proj = toVector - proj(toVector, fromVector);
+		if (length(non_norm_proj) < 0.00001) {
+			//from and to are likely the same, so just return
+			return;
+		}
+		vec4 perp_toVector = normalize(non_norm_proj);
 
 		if (any(isnan(perp_toVector))) {
 			throw std::exception();
 		}
 		if (abs(dot(perp_toVector, fromVector)) > 0.0001) {
+			float f = dot(perp_toVector, fromVector);
 			throw std::exception();
 		}
 		if (abs(length(perp_toVector) - 1) > 0.0001) {
+			float f = length(perp_toVector);
 			throw std::exception();
 		}
 
