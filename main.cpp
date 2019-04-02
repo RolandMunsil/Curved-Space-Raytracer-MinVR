@@ -462,31 +462,24 @@ public:
 
 		float user_scale = 1;
 
+		// Move position in virtual world
 		vec4 moveDirection = normalize(
 			(thisCameraInfo->rightDir * changeMat_translation.x) +
 			(thisCameraInfo->upDir * changeMat_translation.y) +
 			(thisCameraInfo->forwardDir * changeMat_translation.z));
 		float moveAmount = user_scale * length(changeMat_translation);
-
-		// Move position in virtual world
+	
 		rotate4DSinglePlaneSpecificAngle(thisCameraInfo->pos, moveDirection, moveAmount,
 			{ &thisCameraInfo->pos, &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
 
-		//get orthographic to plane: rotDir - rotDir_projected_onto_pos
-		//for every point, get component in plane, do sincos, add back
 
-		// Move position in virtual world
-		//moveInDir(thisCameraInfo->pos, thisCameraInfo->rightDir, changeMat_translation.x);
-		//moveInDir(thisCameraInfo->pos, thisCameraInfo->upDir, changeMat_translation.y);
-		//moveInDir(thisCameraInfo->pos, thisCameraInfo->forwardDir, changeMat_translation.z);
-
+		// Rotate view in virtual world
 		vec3 rotatedForwardVector = changeMat_rotation * vec3(0, 0, 1);
 		vec4 rotationDirection = normalize(
 			(thisCameraInfo->rightDir * rotatedForwardVector.x) +
 			(thisCameraInfo->upDir * rotatedForwardVector.y) +
 			(thisCameraInfo->forwardDir * rotatedForwardVector.z));
 
-		// Rotate view in virtual world
 		rotate4DSinglePlane(thisCameraInfo->forwardDir, rotationDirection,
 			{ &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
 
@@ -499,12 +492,6 @@ public:
 		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->rightDir)) > 0.0001) {
 			throw std::exception();
 		}
-
-		// Rotate in virtual world
-		//vec3 changeMat_eulerAngles = eulerAngles(changeMat_rotation);
-		//moveInDir(thisCameraInfo->rightDir, thisCameraInfo->upDir, changeMat_eulerAngles.z);
-		//moveInDir(thisCameraInfo->forwardDir, thisCameraInfo->rightDir, changeMat_eulerAngles.y);
-		//moveInDir(thisCameraInfo->upDir, thisCameraInfo->forwardDir, changeMat_eulerAngles.x);
 
 		// Update camera info
 		thisCameraInfo->previousRealWorldViewMatrix = curViewMatrix;
