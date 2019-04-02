@@ -465,18 +465,25 @@ public:
 		//// https://en.wikipedia.org/wiki/Plane_of_rotation
 		//// https://www.youtube.com/watch?v=PNlgMPzj-7Q&list=PLpzmRsG7u_gqaTo_vEseQ7U8KFvtiJY4K
 		//// http://wscg.zcu.cz/wscg2004/Papers_2004_Short/N29.pdf
-		//vec4 rotDir = normalize((thisCameraInfo->rightDir * posRelativeToPreviousPos.x) +
-		//	(thisCameraInfo->upDir * posRelativeToPreviousPos.y) +
-		//	(thisCameraInfo->forwardDir * posRelativeToPreviousPos.z));
-		//float rotAmnt = length(posRelativeToPreviousPos);
+
+		float user_scale = 1;
+
+		vec4 rotDir = normalize((thisCameraInfo->rightDir * changeMat_translation.x) +
+			(thisCameraInfo->upDir * changeMat_translation.y) +
+			(thisCameraInfo->forwardDir * changeMat_translation.z));
+		float rotAmnt = user_scale * length(changeMat_translation);
+
+		//Move position
+		rotate4DSinglePlaneSpecificAngle(thisCameraInfo->pos, rotDir, rotAmnt,
+			{ &thisCameraInfo->pos, &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
 
 		//get orthographic to plane: rotDir - rotDir_projected_onto_pos
 		//for every point, get component in plane, do sincos, add back
 
 		// Move position in virtual world
-		moveInDir(thisCameraInfo->pos, thisCameraInfo->rightDir, changeMat_translation.x);
-		moveInDir(thisCameraInfo->pos, thisCameraInfo->upDir, changeMat_translation.y);
-		moveInDir(thisCameraInfo->pos, thisCameraInfo->forwardDir, changeMat_translation.z);
+		//moveInDir(thisCameraInfo->pos, thisCameraInfo->rightDir, changeMat_translation.x);
+		//moveInDir(thisCameraInfo->pos, thisCameraInfo->upDir, changeMat_translation.y);
+		//moveInDir(thisCameraInfo->pos, thisCameraInfo->forwardDir, changeMat_translation.z);
 
 		// Rotate in virtual world
 		vec3 changeMat_eulerAngles = eulerAngles(changeMat_rotation);
