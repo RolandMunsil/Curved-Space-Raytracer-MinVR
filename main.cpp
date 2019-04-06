@@ -432,9 +432,6 @@ public:
     }
     
 	void onRenderGraphicsScene(const VRGraphicsState& state) {
-		// clear screen
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		int windowId = state.getWindowId();
 		if (((VRString)state.index().getValue("Eye")) == "Left") {
 			// So that left and right eye will get treated separately
@@ -450,21 +447,12 @@ public:
 
 		CameraInfo* thisCameraInfo = &cameraInfos.at(windowId);
 
-		/*
-		D * O * p = N * p
-		D * O = N
-		D = N * O^-1
-		*/
 		//changeMatrix is a view matrix from the old matrix to the new one
 		mat4 changeMatrix = curViewMatrix * inverse(thisCameraInfo->previousRealWorldViewMatrix);
 
-		vec3 changeMat_scale;
 		quat changeMat_rotation;
 		vec3 changeMat_translation;
-		vec3 changeMat_skew;
-		vec4 changeMat_perspective;
-		glm::decompose(changeMatrix, changeMat_scale, changeMat_rotation, changeMat_translation, changeMat_skew, changeMat_perspective);
-
+		glm::decompose(changeMatrix, vec3(0), changeMat_rotation, changeMat_translation, vec3(0), vec4(0));
 
 		float user_scale = 1;
 
@@ -490,13 +478,6 @@ public:
 		thisCameraInfo->upDir = matWithDirsAsBases * rotatedUpVector;
 		thisCameraInfo->forwardDir = matWithDirsAsBases * rotatedForwardVector;
 
-		//vec4 rotationDirection = normalize(
-		//	(thisCameraInfo->rightDir * rotatedForwardVector.x) +
-		//	(thisCameraInfo->upDir * rotatedForwardVector.y) +
-		//	(thisCameraInfo->forwardDir * rotatedForwardVector.z));
-
-		//rotate4DSinglePlane(thisCameraInfo->forwardDir, rotationDirection,
-		//	{ &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
 
 		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->forwardDir)) > 0.0001) {
 			throw std::exception();
