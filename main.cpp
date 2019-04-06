@@ -458,13 +458,13 @@ public:
 		//changeMatrix is a view matrix from the old matrix to the new one
 		mat4 changeMatrix = curViewMatrix * inverse(thisCameraInfo->previousRealWorldViewMatrix);
 
-
 		vec3 changeMat_scale;
 		quat changeMat_rotation;
 		vec3 changeMat_translation;
 		vec3 changeMat_skew;
 		vec4 changeMat_perspective;
 		glm::decompose(changeMatrix, changeMat_scale, changeMat_rotation, changeMat_translation, changeMat_skew, changeMat_perspective);
+
 
 		float user_scale = 1;
 
