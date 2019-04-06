@@ -167,7 +167,7 @@ public:
 			windowId += 0x100;
 		}
 
-		std::unique_lock<shared_mutex> lock(map_mutex);
+		std::unique_lock<std::shared_mutex> lock(map_mutex);
 		if (state.isInitialRenderCall()) {
 			CameraInfo inf = { mat4(1.0), vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
 			cameraInfos[windowId] = inf;
@@ -683,6 +683,8 @@ private:
 	GLuint _indexVBO;
 	GLsizei _numIndices;
 	GLuint _programHandle;
+
+	mutable std::shared_mutex map_mutex;
 
 	std::map<int, CameraInfo> cameraInfos = std::map<int, CameraInfo>();
 
