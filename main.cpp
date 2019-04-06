@@ -154,280 +154,7 @@ public:
 			userUpDirLocation = glGetUniformLocation(_programHandle, "userUpDir");
 			userRightDirLocation = glGetUniformLocation(_programHandle, "userRightDir");
 
-
-
-			//Testing
-			float test_epsilon = 0.00001;
-			//////////// Rotating A from A to B ////////////
-			{
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = vec4(1, 0, 0, 0);
-
-				rotate4DSinglePlane(testVec, desiredVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = vec4(0, 1, 0, 0);
-
-				rotate4DSinglePlane(testVec, desiredVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					vec4 diff = testVec - desiredVec;
-					float len = length(testVec - desiredVec);
-					throw std::exception();
-				}
-			}
-			{
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = vec4(0, 0, 1, 0);
-
-				rotate4DSinglePlane(testVec, desiredVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = vec4(0, 0, 0, 1);
-
-				rotate4DSinglePlane(testVec, desiredVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = normalize(vec4(4, 3, 2, 1));
-
-				rotate4DSinglePlane(testVec, desiredVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = normalize(vec4(-3, 0, 10, 0.36));
-
-				rotate4DSinglePlane(testVec, desiredVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 testVec = normalize(vec4(4, 3, 2, 1));
-				vec4 desiredVec = normalize(vec4(-3, 0, 10, 0.36));
-
-				rotate4DSinglePlane(testVec, desiredVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-
-			//////////// Rotate vectors in plane ////////////
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(0, 1, 0, 0);
-				vec4 desiredVec = vec4(-1, 0, 0, 0);
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(-1, 0, 0, 0);
-				vec4 desiredVec = vec4(0, -1, 0, 0);
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = normalize(vec4(1, 1, 0, 0));
-				vec4 testVec = vec4(0, 1, 0, 0);
-				vec4 desiredVec = normalize(vec4(-1, 1, 0, 0));
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = normalize(vec4(1, 1, 0, 0));
-				vec4 testVec = normalize(vec4(1, 1, 0, 0));
-				vec4 desiredVec = vec4(0, 1, 0, 0);
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-
-			//////////// Do NOT rotate vectors orthogonal ////////////
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(0, 0, 1, 0);
-				vec4 desiredVec = testVec;
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(0, 0, 0, 1);
-				vec4 desiredVec = testVec;
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(0, 0, 1, 1);
-				vec4 desiredVec = testVec;
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = normalize(vec4(0, 1, 1, 0));
-				vec4 testVec = vec4(0, 0, 0, 1);
-				vec4 desiredVec = testVec;
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = normalize(vec4(0, 1, 1, 0));
-				vec4 testVec = vec4(0, 0, 0, -1);
-				vec4 desiredVec = testVec;
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-
-			//////////// Non-normal vectors are still non-normal ////////////
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(0, 2, 0, 0);
-				vec4 desiredVec = vec4(-2, 0, 0, 0);
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(-0.3, 0, 0, 0);
-				vec4 desiredVec = vec4(0, -0.3, 0, 0);
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec)> test_epsilon) {
-					throw std::exception();
-				}
-			}
-
-			//////////// Rotate vectors not orthogonal but not in plane ////////////
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(0, 1, 0, 1);
-				vec4 desiredVec = vec4(-1, 0, 0, 1);
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
-					throw std::exception();
-				}
-			}
-
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				vec4 testVec = vec4(0, 1, 2, 1);
-				vec4 desiredVec = vec4(-1, 0, 2, 1);
-
-				rotate4DSinglePlane(fromVec, toVec, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
-					throw std::exception();
-				}
-			}
-
-			//////////// With specific angle ////////////
-
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				float angle = radians(45.0);
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = normalize(vec4(1, 1, 0, 0));
-
-				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				float angle = radians(-45.0);
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = normalize(vec4(1, -1, 0, 0));
-
-				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				float angle = radians(-90.0);
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = normalize(vec4(0, -1, 0, 0));
-
-				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
-					throw std::exception();
-				}
-			}
-			{
-				vec4 fromVec = vec4(1, 0, 0, 0);
-				vec4 toVec = vec4(0, 1, 0, 0);
-				float angle = radians(30.0);
-				vec4 testVec = vec4(1, 0, 0, 0);
-				vec4 desiredVec = normalize(vec4(cos(radians(30.0)), 0.5, 0, 0));
-
-				rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
-				if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
-					throw std::exception();
-				}
-			}
-
+			testRotationMethods();
         }
     }
     
@@ -435,7 +162,7 @@ public:
 		int windowId = state.getWindowId();
 		if (((VRString)state.index().getValue("Eye")) == "Left") {
 			// So that left and right eye will get treated separately
-			windowId += 0xF0;
+			windowId += 0x100;
 		}
 
 		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
@@ -454,14 +181,12 @@ public:
 		vec3 changeMat_translation;
 		glm::decompose(changeMatrix, vec3(0), changeMat_rotation, changeMat_translation, vec3(0), vec4(0));
 
-		float user_scale = 1;
-
 		// Move position in virtual world
 		vec4 moveDirection = normalize(
 			(thisCameraInfo->rightDir * changeMat_translation.x) +
 			(thisCameraInfo->upDir * changeMat_translation.y) +
 			(thisCameraInfo->forwardDir * changeMat_translation.z));
-		float moveAmount = user_scale * length(changeMat_translation);
+		float moveAmount = USER_SCALE * length(changeMat_translation);
 	
 		rotate4DSinglePlaneSpecificAngle(thisCameraInfo->pos, moveDirection, moveAmount,
 			{ &thisCameraInfo->pos, &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
@@ -594,6 +319,281 @@ public:
 			*p_v = final_result;
 		}
 	}
+
+	void testRotationMethods() {
+		//Testing
+		float test_epsilon = 0.00001;
+		//////////// Rotating A from A to B ////////////
+		{
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = vec4(1, 0, 0, 0);
+
+			rotate4DSinglePlane(testVec, desiredVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = vec4(0, 1, 0, 0);
+
+			rotate4DSinglePlane(testVec, desiredVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				vec4 diff = testVec - desiredVec;
+				float len = length(testVec - desiredVec);
+				throw std::exception();
+			}
+		}
+		{
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = vec4(0, 0, 1, 0);
+
+			rotate4DSinglePlane(testVec, desiredVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = vec4(0, 0, 0, 1);
+
+			rotate4DSinglePlane(testVec, desiredVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = normalize(vec4(4, 3, 2, 1));
+
+			rotate4DSinglePlane(testVec, desiredVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = normalize(vec4(-3, 0, 10, 0.36));
+
+			rotate4DSinglePlane(testVec, desiredVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 testVec = normalize(vec4(4, 3, 2, 1));
+			vec4 desiredVec = normalize(vec4(-3, 0, 10, 0.36));
+
+			rotate4DSinglePlane(testVec, desiredVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+
+		//////////// Rotate vectors in plane ////////////
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(0, 1, 0, 0);
+			vec4 desiredVec = vec4(-1, 0, 0, 0);
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(-1, 0, 0, 0);
+			vec4 desiredVec = vec4(0, -1, 0, 0);
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = normalize(vec4(1, 1, 0, 0));
+			vec4 testVec = vec4(0, 1, 0, 0);
+			vec4 desiredVec = normalize(vec4(-1, 1, 0, 0));
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = normalize(vec4(1, 1, 0, 0));
+			vec4 testVec = normalize(vec4(1, 1, 0, 0));
+			vec4 desiredVec = vec4(0, 1, 0, 0);
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+
+		//////////// Do NOT rotate vectors orthogonal ////////////
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(0, 0, 1, 0);
+			vec4 desiredVec = testVec;
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(0, 0, 0, 1);
+			vec4 desiredVec = testVec;
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(0, 0, 1, 1);
+			vec4 desiredVec = testVec;
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = normalize(vec4(0, 1, 1, 0));
+			vec4 testVec = vec4(0, 0, 0, 1);
+			vec4 desiredVec = testVec;
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = normalize(vec4(0, 1, 1, 0));
+			vec4 testVec = vec4(0, 0, 0, -1);
+			vec4 desiredVec = testVec;
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+
+		//////////// Non-normal vectors are still non-normal ////////////
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(0, 2, 0, 0);
+			vec4 desiredVec = vec4(-2, 0, 0, 0);
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(-0.3, 0, 0, 0);
+			vec4 desiredVec = vec4(0, -0.3, 0, 0);
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+
+		//////////// Rotate vectors not orthogonal but not in plane ////////////
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(0, 1, 0, 1);
+			vec4 desiredVec = vec4(-1, 0, 0, 1);
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			vec4 testVec = vec4(0, 1, 2, 1);
+			vec4 desiredVec = vec4(-1, 0, 2, 1);
+
+			rotate4DSinglePlane(fromVec, toVec, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+
+		//////////// With specific angle ////////////
+
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			float angle = radians(45.0);
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = normalize(vec4(1, 1, 0, 0));
+
+			rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			float angle = radians(-45.0);
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = normalize(vec4(1, -1, 0, 0));
+
+			rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			float angle = radians(-90.0);
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = normalize(vec4(0, -1, 0, 0));
+
+			rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+		{
+			vec4 fromVec = vec4(1, 0, 0, 0);
+			vec4 toVec = vec4(0, 1, 0, 0);
+			float angle = radians(30.0);
+			vec4 testVec = vec4(1, 0, 0, 0);
+			vec4 desiredVec = normalize(vec4(cos(radians(30.0)), 0.5, 0, 0));
+
+			rotate4DSinglePlaneSpecificAngle(fromVec, toVec, angle, { &testVec });
+			if (any(isnan(testVec)) || any(isinf(testVec)) || length(testVec - desiredVec) > test_epsilon) {
+				throw std::exception();
+			}
+		}
+	}
+
 	void setUniform(GLint location, glm::mat4& matrix, GLboolean transpose) {
 		glUniformMatrix4fv(location, 1, transpose, &(matrix[0][0]));
 	}
@@ -676,6 +676,8 @@ private:
 	GLint userForwardDirLocation;
 	GLint userUpDirLocation;
 	GLint userRightDirLocation;
+
+	float USER_SCALE = 1;
 };
 
 /// Main method which creates and calls application
