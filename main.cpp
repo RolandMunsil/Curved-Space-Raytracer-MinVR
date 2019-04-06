@@ -165,8 +165,6 @@ public:
 			windowId += 0x100;
 		}
 
-		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
-
 		if (state.isInitialRenderCall()) {
 			CameraInfo inf = { mat4(1.0), vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
 			cameraInfos[windowId] = inf;
@@ -175,11 +173,14 @@ public:
 		CameraInfo* thisCameraInfo = &cameraInfos.at(windowId);
 
 		//changeMatrix is a view matrix from the old matrix to the new one
+		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
 		mat4 changeMatrix = curViewMatrix * inverse(thisCameraInfo->previousRealWorldViewMatrix);
 
 		quat changeMat_rotation;
 		vec3 changeMat_translation;
 		glm::decompose(changeMatrix, vec3(0), changeMat_rotation, changeMat_translation, vec3(0), vec4(0));
+
+
 
 		// Move position in virtual world
 		vec4 moveDirection = normalize(
@@ -190,7 +191,6 @@ public:
 	
 		rotate4DSinglePlaneSpecificAngle(thisCameraInfo->pos, moveDirection, moveAmount,
 			{ &thisCameraInfo->pos, &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
-
 
 		// Rotate view in virtual world
 		vec3 rotatedRightVector = changeMat_rotation * vec3(1, 0, 0);
@@ -204,6 +204,8 @@ public:
 		thisCameraInfo->forwardDir = matWithDirsAsBases * rotatedForwardVector;
 
 
+
+		// Do some checks to make sure rotation and position didn't mess anything up
 		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->forwardDir)) > 0.0001) {
 			throw std::exception();
 		}
@@ -211,6 +213,15 @@ public:
 			throw std::exception();
 		}
 		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->rightDir)) > 0.0001) {
+			throw std::exception();
+		}
+		if (abs(dot(thisCameraInfo->rightDir, thisCameraInfo->upDir)) > 0.0001) {
+			throw std::exception();
+		}
+		if (abs(dot(thisCameraInfo->upDir, thisCameraInfo->forwardDir)) > 0.0001) {
+			throw std::exception();
+		}
+		if (abs(dot(thisCameraInfo->forwardDir, thisCameraInfo->rightDir)) > 0.0001) {
 			throw std::exception();
 		}
 
@@ -230,6 +241,7 @@ public:
 		setUniform(userUpDirLocation, thisCameraInfo->upDir);
 		setUniform(userRightDirLocation, thisCameraInfo->rightDir);
 
+		// Render
 		glDrawElements(GL_TRIANGLE_STRIP, _numIndices, GL_UNSIGNED_INT, 0);
 
 	}
