@@ -1,4 +1,6 @@
 #include <iostream>
+#include <mutex>  // For std::unique_lock
+#include <shared_mutex>
 
 #ifdef _WIN32
 #include "GL/glew.h"
@@ -165,12 +167,14 @@ public:
 			windowId += 0x100;
 		}
 
+		std::unique_lock<shared_mutex> lock(map_mutex);
 		if (state.isInitialRenderCall()) {
 			CameraInfo inf = { mat4(1.0), vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
 			cameraInfos[windowId] = inf;
 		}
 
 		CameraInfo* thisCameraInfo = &cameraInfos.at(windowId);
+		lock.unlock();
 
 		//changeMatrix is a view matrix from the old matrix to the new one
 		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
