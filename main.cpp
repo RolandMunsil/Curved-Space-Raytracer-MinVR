@@ -136,8 +136,8 @@ public:
 			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, cpuIndexByteSize, &cpuIndexArray[0]);
             
             // Create shaders
-			GLuint vshader = loadAndCompileShader("../../bin/shader.vert", GL_VERTEX_SHADER);
-			GLuint fshader = loadAndCompileShader("../../bin/shader.frag", GL_FRAGMENT_SHADER);
+			GLuint vshader = loadAndCompileShader("shader.vert", GL_VERTEX_SHADER);
+			GLuint fshader = loadAndCompileShader("shader.frag", GL_FRAGMENT_SHADER);
             
             // Create shader program
 			_programHandle = glCreateProgram();
