@@ -184,56 +184,13 @@ public:
 
 		//changeMatrix is a view matrix from the old matrix to the new one
 		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
-		mat4 changeMatrix = curViewMatrix * inverse(thisCameraInfo->previousRealWorldViewMatrix);
 
-		quat changeMat_rotation;
-		vec3 changeMat_translation;
-		glm::decompose(changeMatrix, vec3(0), changeMat_rotation, changeMat_translation, vec3(0), vec4(0));
-
-
-
-		// Move position in virtual world
-		vec4 moveDirection = normalize(
-			(thisCameraInfo->rightDir * changeMat_translation.x) +
-			(thisCameraInfo->upDir * changeMat_translation.y) +
-			(thisCameraInfo->forwardDir * changeMat_translation.z));
-		float moveAmount = USER_SCALE * length(changeMat_translation);
-	
-		rotate4DSinglePlaneSpecificAngle(thisCameraInfo->pos, moveDirection, moveAmount,
-			{ &thisCameraInfo->pos, &thisCameraInfo->rightDir, &thisCameraInfo->upDir, &thisCameraInfo->forwardDir });
-
-		// Rotate view in virtual world
-		vec3 rotatedRightVector = changeMat_rotation * vec3(1, 0, 0);
-		vec3 rotatedUpVector = changeMat_rotation * vec3(0, 1, 0);
-		vec3 rotatedForwardVector = changeMat_rotation * vec3(0, 0, 1);
-
-		mat3x4 matWithDirsAsBases(thisCameraInfo->rightDir, thisCameraInfo->upDir, thisCameraInfo->forwardDir);
-
-		thisCameraInfo->rightDir = matWithDirsAsBases * rotatedRightVector;
-		thisCameraInfo->upDir = matWithDirsAsBases * rotatedUpVector;
-		thisCameraInfo->forwardDir = matWithDirsAsBases * rotatedForwardVector;
-
-
-
-		// Do some checks to make sure rotation and position didn't mess anything up
-		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->forwardDir)) > 0.0001) {
-			throw std::exception();
-		}
-		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->upDir)) > 0.0001) {
-			throw std::exception();
-		}
-		if (abs(dot(thisCameraInfo->pos, thisCameraInfo->rightDir)) > 0.0001) {
-			throw std::exception();
-		}
-		if (abs(dot(thisCameraInfo->rightDir, thisCameraInfo->upDir)) > 0.0001) {
-			throw std::exception();
-		}
-		if (abs(dot(thisCameraInfo->upDir, thisCameraInfo->forwardDir)) > 0.0001) {
-			throw std::exception();
-		}
-		if (abs(dot(thisCameraInfo->forwardDir, thisCameraInfo->rightDir)) > 0.0001) {
-			throw std::exception();
-		}
+		CurvedWorldPosAndRot userState = { thisCameraInfo->pos, thisCameraInfo->forwardDir, thisCameraInfo->upDir, thisCameraInfo->rightDir };
+		changeByMatrixDifference(thisCameraInfo->previousRealWorldViewMatrix, curViewMatrix, USER_SCALE, &userState);
+		thisCameraInfo->pos = userState.pos;
+		thisCameraInfo->forwardDir = userState.forwardDir;
+		thisCameraInfo->upDir = userState.upDir;
+		thisCameraInfo->rightDir = userState.rightDir;
 
 		// Update camera info
 		thisCameraInfo->previousRealWorldViewMatrix = curViewMatrix;

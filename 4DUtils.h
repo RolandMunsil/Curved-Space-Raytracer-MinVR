@@ -4,6 +4,13 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
+struct CurvedWorldPosAndRot {
+	vec4 pos;
+	vec4 forwardDir;	
+	vec4 upDir;
+	vec4 rightDir;
+};
+
 void rotate4DSinglePlaneSpecificAngle(vec4 fromVector, vec4 toVector, float angle, std::vector<vec4*> vectorsToRotate) {
 	if (abs(length(fromVector) - 1) > 0.0001) {
 		throw std::exception();
@@ -85,6 +92,59 @@ void rotate4DSinglePlane(vec4 fromVector, vec4 toVector, std::vector<vec4*> vect
 	// Clamp for cases where a vector is *slightly* longer than 1
 	float rotationAngle = acos(clamp(dot(fromVector, toVector), -1.0f, 1.0f));
 	rotate4DSinglePlaneSpecificAngle(fromVector, toVector, rotationAngle, vectorsToRotate);
+}
+
+void changeByMatrixDifference(mat4 fromMat, mat4 toMat, float movement_scale, CurvedWorldPosAndRot* posAndRot) {
+	mat4 changeMatrix = toMat * inverse(fromMat);
+
+	quat changeMat_rotation;
+	vec3 changeMat_translation;
+	glm::decompose(changeMatrix, vec3(0), changeMat_rotation, changeMat_translation, vec3(0), vec4(0));
+
+
+
+	// Move position in virtual world
+	vec4 moveDirection = normalize(
+		(posAndRot->rightDir * changeMat_translation.x) +
+		(posAndRot->upDir * changeMat_translation.y) +
+		(posAndRot->forwardDir * changeMat_translation.z));
+	float moveAmount = movement_scale * length(changeMat_translation);
+
+	rotate4DSinglePlaneSpecificAngle(posAndRot->pos, moveDirection, moveAmount,
+		{ &posAndRot->pos, &posAndRot->rightDir, &posAndRot->upDir, &posAndRot->forwardDir });
+
+	// Rotate view in virtual world
+	vec3 rotatedRightVector = changeMat_rotation * vec3(1, 0, 0);
+	vec3 rotatedUpVector = changeMat_rotation * vec3(0, 1, 0);
+	vec3 rotatedForwardVector = changeMat_rotation * vec3(0, 0, 1);
+
+	mat3x4 matWithDirsAsBases(posAndRot->rightDir, posAndRot->upDir, posAndRot->forwardDir);
+
+	posAndRot->rightDir = matWithDirsAsBases * rotatedRightVector;
+	posAndRot->upDir = matWithDirsAsBases * rotatedUpVector;
+	posAndRot->forwardDir = matWithDirsAsBases * rotatedForwardVector;
+
+
+
+	// Do some checks to make sure rotation and position didn't mess anything up
+	if (abs(dot(posAndRot->pos, posAndRot->forwardDir)) > 0.0001) {
+		throw std::exception();
+	}
+	if (abs(dot(posAndRot->pos, posAndRot->upDir)) > 0.0001) {
+		throw std::exception();
+	}
+	if (abs(dot(posAndRot->pos, posAndRot->rightDir)) > 0.0001) {
+		throw std::exception();
+	}
+	if (abs(dot(posAndRot->rightDir, posAndRot->upDir)) > 0.0001) {
+		throw std::exception();
+	}
+	if (abs(dot(posAndRot->upDir, posAndRot->forwardDir)) > 0.0001) {
+		throw std::exception();
+	}
+	if (abs(dot(posAndRot->forwardDir, posAndRot->rightDir)) > 0.0001) {
+		throw std::exception();
+	}
 }
 
 void testRotationMethods() {
