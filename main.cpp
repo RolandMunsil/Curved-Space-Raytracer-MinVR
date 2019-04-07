@@ -76,8 +76,13 @@ public:
     
     void onCursorMove(const VRCursorEvent &state) {}
     
-    void onTrackerMove(const VRTrackerEvent &state) {}
-
+    void onTrackerMove(const VRTrackerEvent &state) {
+		if (state.getName() == "HeadTracker_Move") {
+			prevHeadMatrix = curHeadMatrix;
+			curHeadMatrix = make_mat4(state.getTransform());
+			changeByMatrixDifference(inverse(prevHeadMatrix), inverse(curHeadMatrix), USER_SCALE, &userState);
+		}
+	}
     
     
     void onRenderAudio(const VRAudioState& state) {}
@@ -86,7 +91,7 @@ public:
     void onRenderConsole(const VRConsoleState& state) {}
 
 	void updateWorld(double currentTime) {
-		//std::cout << "test";
+		//changeByMatrixDifference(prevHeadMatrix, curHeadMatrix, USER_SCALE, &userState);
 	}
 
     void onRenderGraphicsContext(const VRGraphicsState& state) {
@@ -167,33 +172,11 @@ public:
     }
     
 	void onRenderGraphicsScene(const VRGraphicsState& state) {
-		int windowId = state.getWindowId();
-		if (((VRString)state.index().getValue("Eye")) == "Left") {
-			// So that left and right eye will get treated separately
-			windowId += 0x100;
-		}
-
-		std::unique_lock<std::shared_mutex> lock(map_mutex);
-		if (state.isInitialRenderCall()) {
-			CameraInfo inf = { mat4(1.0), vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
-			cameraInfos[windowId] = inf;
-		}
-
-		CameraInfo* thisCameraInfo = &cameraInfos.at(windowId);
-		lock.unlock();
 
 		//changeMatrix is a view matrix from the old matrix to the new one
-		mat4 curViewMatrix = make_mat4(state.getViewMatrix());
-
-		CurvedWorldPosAndRot userState = { thisCameraInfo->pos, thisCameraInfo->forwardDir, thisCameraInfo->upDir, thisCameraInfo->rightDir };
-		changeByMatrixDifference(thisCameraInfo->previousRealWorldViewMatrix, curViewMatrix, USER_SCALE, &userState);
-		thisCameraInfo->pos = userState.pos;
-		thisCameraInfo->forwardDir = userState.forwardDir;
-		thisCameraInfo->upDir = userState.upDir;
-		thisCameraInfo->rightDir = userState.rightDir;
-
-		// Update camera info
-		thisCameraInfo->previousRealWorldViewMatrix = curViewMatrix;
+		mat4 viewMatrix = make_mat4(state.getViewMatrix());
+		CurvedWorldPosAndRot thisViewPosAndRot = userState;
+		changeByMatrixDifference(inverse(curHeadMatrix), viewMatrix, USER_SCALE, &thisViewPosAndRot);
 
 		// Setup uniforms
 		GLfloat windowHeight = state.index().getValue("FramebufferHeight");
@@ -203,10 +186,10 @@ public:
 		mat4 projectionMat = make_mat4(state.getProjectionMatrix());
 		setUniform(projectionMatLocation, projectionMat, GL_FALSE);
 
-		setUniform(userPosLocation, thisCameraInfo->pos);
-		setUniform(userForwardDirLocation, thisCameraInfo->forwardDir);
-		setUniform(userUpDirLocation, thisCameraInfo->upDir);
-		setUniform(userRightDirLocation, thisCameraInfo->rightDir);
+		setUniform(userPosLocation, thisViewPosAndRot.pos);
+		setUniform(userForwardDirLocation, thisViewPosAndRot.forwardDir);
+		setUniform(userUpDirLocation, thisViewPosAndRot.upDir);
+		setUniform(userRightDirLocation, thisViewPosAndRot.rightDir);
 
 		// Render
 		glDrawElements(GL_TRIANGLE_STRIP, _numIndices, GL_UNSIGNED_INT, 0);
@@ -280,10 +263,6 @@ private:
 	GLsizei _numIndices;
 	GLuint _programHandle;
 
-	mutable std::shared_mutex map_mutex;
-
-	std::map<int, CameraInfo> cameraInfos = std::map<int, CameraInfo>();
-
 	GLint viewportResolutionLocation;
 	GLint projectionMatLocation;
 	GLint userPosLocation;
@@ -292,6 +271,11 @@ private:
 	GLint userRightDirLocation;
 
 	float USER_SCALE = 1;
+
+	mat4 curHeadMatrix = mat4(1.0);
+	mat4 prevHeadMatrix = mat4(1.0);
+
+	CurvedWorldPosAndRot userState = { vec4(0,1,0,0), vec4(1,0,0,0), vec4(0,0,0,1), vec4(0,0,1,0) };
 };
 
 /// Main method which creates and calls application

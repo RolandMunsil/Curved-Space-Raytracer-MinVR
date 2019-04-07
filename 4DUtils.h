@@ -96,12 +96,11 @@ void rotate4DSinglePlane(vec4 fromVector, vec4 toVector, std::vector<vec4*> vect
 
 void changeByMatrixDifference(mat4 fromMat, mat4 toMat, float movement_scale, CurvedWorldPosAndRot* posAndRot) {
 	mat4 changeMatrix = toMat * inverse(fromMat);
+	//mat4 changeMatrix = inverse(toMat) * fromMat;
 
 	quat changeMat_rotation;
 	vec3 changeMat_translation;
 	glm::decompose(changeMatrix, vec3(0), changeMat_rotation, changeMat_translation, vec3(0), vec4(0));
-
-
 
 	// Move position in virtual world
 	vec4 moveDirection = normalize(
