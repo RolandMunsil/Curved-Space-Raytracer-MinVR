@@ -30,7 +30,8 @@ if (NOT MINVR_INSTALL_PATH STREQUAL "")
 	  VRMultithreadedApp.cpp
 	)
 	set (HEADERFILES
-	VRMultithreadedApp.h
+		VRMultithreadedApp.h
+		4DUtils.h
 	)
 	set (EXTRAFILES
 	  shaders/shader.frag
