@@ -41,6 +41,8 @@ using namespace MinVR;
 #include <glm/gtx/rotate_vector.hpp>
 using namespace glm;
 
+#include "VRMultithreadedApp.h"
+
 struct CameraInfo {
 	mat4 previousRealWorldViewMatrix;
 
@@ -55,9 +57,9 @@ struct CameraInfo {
  * from VRGraphicsApp, which allows you to override onVREvent to get input events, onRenderContext
  * to setup context sepecific objects, and onRenderScene that renders to each viewport.
  */
-class MyVRApp : public VRApp {
+class MyVRApp : public VRMultithreadedApp {
 public:
-    MyVRApp(int argc, char** argv) : VRApp(argc, argv) {
+    MyVRApp(int argc, char** argv) : VRMultithreadedApp(argc, argv) {
     }
 
 
@@ -82,7 +84,10 @@ public:
     
     void onRenderConsole(const VRConsoleState& state) {}
 
-    
+	void updateWorld(double currentTime) {
+		//std::cout << "test";
+	}
+
     void onRenderGraphicsContext(const VRGraphicsState& state) {
         // If this is the inital call, initialize context variables
 		if (state.isInitialRenderCall()) {

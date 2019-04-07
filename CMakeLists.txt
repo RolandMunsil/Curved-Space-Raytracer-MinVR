@@ -27,8 +27,10 @@ if (NOT MINVR_INSTALL_PATH STREQUAL "")
 	# Source:
 	set (SOURCEFILES 
 	  main.cpp
+	  VRMultithreadedApp.cpp
 	)
 	set (HEADERFILES
+	VRMultithreadedApp.h
 	)
 	set (EXTRAFILES
 	  shaders/shader.frag
