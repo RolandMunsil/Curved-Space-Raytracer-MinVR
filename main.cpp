@@ -273,16 +273,6 @@ public:
 		}
 	}
 
-	void moveInDir(vec4& position, vec4& direction, float angle)
-	{
-		vec4 newPosition = (cos(angle) * position) + (sin(angle) * direction);
-		vec4 newDirection = (cos(angle) * direction) + (sin(angle) * -position);
-
-		position = newPosition;
-		direction = newDirection;
-	}
-    
-
 private:
 	GLuint _vaoID;
 	GLuint _vertexVBO;
