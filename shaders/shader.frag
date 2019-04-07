@@ -34,7 +34,7 @@ const float AMBIENT_LIGHT = 0.1;
 const vec4 LIGHT_POSITION = normalize(vec4(1.,0.,0., 0.25));
 
 const vec3 BACKGROUND_COLOR = vec3(0);
-const bool USER_SPHERE_VISIBLE = true;
+const bool USER_SPHERE_VISIBLE = false;
 
 
 ///////////////////////////// UTILITY METHODS ////////////////////////////
