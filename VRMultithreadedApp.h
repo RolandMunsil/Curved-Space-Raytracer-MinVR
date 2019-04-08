@@ -105,6 +105,8 @@ class VRMultithreadedApp : public VREventHandler, public VRRenderHandler, public
 
 		int getNumWindows();
 
+	protected:
+		std::string headTrackingEventName;
 
 	private:
 		VRMain * _main;

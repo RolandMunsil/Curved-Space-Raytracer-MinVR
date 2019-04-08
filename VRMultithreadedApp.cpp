@@ -19,6 +19,7 @@ namespace MinVR {
 		_main->addRenderHandler(this);
 		_main->addModelHandler(this);
 		_main->initialize(argc, argv);
+		headTrackingEventName = _main->getConfig()->getValueWithDefault<std::string>("MinVR/HeadTrackingEvent", "Head_Move");
 	}
 
 	VRMultithreadedApp::~VRMultithreadedApp() {

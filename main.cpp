@@ -76,11 +76,19 @@ public:
     
     void onCursorMove(const VRCursorEvent &state) {}
     
+	bool firstTime = true;
+	bool moved = false;
+
     void onTrackerMove(const VRTrackerEvent &state) {
-		if (state.getName() == "HeadTracker_Move") {
-			prevHeadMatrix = curHeadMatrix;
+		if (state.getName().substr(0, 4) == headTrackingEventName) {
 			curHeadMatrix = make_mat4(state.getTransform());
-			changeByMatrixDifference(inverse(prevHeadMatrix), inverse(curHeadMatrix), USER_SCALE, &userState);
+			if (firstTime) {
+				firstTime = false;
+				prevHeadMatrix = curHeadMatrix;
+			}
+			else {
+				moved = true;
+			}
 		}
 	}
     
@@ -91,7 +99,11 @@ public:
     void onRenderConsole(const VRConsoleState& state) {}
 
 	void updateWorld(double currentTime) {
-		//changeByMatrixDifference(prevHeadMatrix, curHeadMatrix, USER_SCALE, &userState);
+		if (moved) {
+			changeByMatrixDifference(prevHeadMatrix, curHeadMatrix, USER_SCALE, &userState);
+			prevHeadMatrix = curHeadMatrix;
+			moved = false;
+		}
 	}
 
     void onRenderGraphicsContext(const VRGraphicsState& state) {
@@ -176,7 +188,7 @@ public:
 		//changeMatrix is a view matrix from the old matrix to the new one
 		mat4 viewMatrix = make_mat4(state.getViewMatrix());
 		CurvedWorldPosAndRot thisViewPosAndRot = userState;
-		changeByMatrixDifference(inverse(curHeadMatrix), viewMatrix, USER_SCALE, &thisViewPosAndRot);
+		changeByMatrixDifference(curHeadMatrix, inverse(viewMatrix), USER_SCALE, &thisViewPosAndRot);
 
 		// Setup uniforms
 		GLfloat windowHeight = state.index().getValue("FramebufferHeight");

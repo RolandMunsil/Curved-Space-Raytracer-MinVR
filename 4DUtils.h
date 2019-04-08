@@ -95,8 +95,18 @@ void rotate4DSinglePlane(vec4 fromVector, vec4 toVector, std::vector<vec4*> vect
 }
 
 void changeByMatrixDifference(mat4 fromMat, mat4 toMat, float movement_scale, CurvedWorldPosAndRot* posAndRot) {
-	mat4 changeMatrix = toMat * inverse(fromMat);
-	//mat4 changeMatrix = inverse(toMat) * fromMat;
+	//T = toMat = a matrix that translates the origin to the new camera center and rotates forward to be the new lookat
+	//F = fromMat = a matrix that translates the origin to the old camera center and rotates forward to be the old lookat
+	//C = changeMat = a matrix that translates the old camera center to the new camera center and same for the lookat
+	//v = some vector
+	//
+	//F^-1 * T * v = C * v
+
+	mat4 changeMatrix = inverse(fromMat) * toMat;
+
+	if (length(vec3(toMat[3] - fromMat[3])) - length(vec3(changeMatrix[3])) > 0.0001) {
+		throw std::exception();
+	}
 
 	quat changeMat_rotation;
 	vec3 changeMat_translation;
@@ -110,7 +120,7 @@ void changeByMatrixDifference(mat4 fromMat, mat4 toMat, float movement_scale, Cu
 	float moveAmount = movement_scale * length(changeMat_translation);
 
 	rotate4DSinglePlaneSpecificAngle(posAndRot->pos, moveDirection, moveAmount,
-		{ &posAndRot->pos, &posAndRot->rightDir, &posAndRot->upDir, &posAndRot->forwardDir });
+		{ &(posAndRot->pos), &(posAndRot->rightDir), &(posAndRot->upDir), &(posAndRot->forwardDir) });
 
 	// Rotate view in virtual world
 	vec3 rotatedRightVector = changeMat_rotation * vec3(1, 0, 0);
